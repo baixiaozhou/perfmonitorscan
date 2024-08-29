@@ -1,0 +1,39 @@
+# 日志级别
+logging:
+  level: 4
+  filename: ../agent.log
+  log_num: 20
+  max_size: 1000000
+  compress: true
+
+# 多个服务的信息采集配置
+process_monitoring:
+  - process_name: java_app1
+    process_type: java
+    cpu_monitoring:
+      threshold: 80
+      stack_trace_collection: true
+      flame_graph_collection: true
+      collection_interval: 60s
+      output_dir: /var/lib/agent/collections/java_app1
+      bin_dir: # jstack dir
+  - process_name: golang_app1
+    process_type: golang
+    cpu_monitoring:
+      threshold: 90
+      stack_trace_collection: false
+      flame_graph_collection: true
+      collection_interval: 120s
+      output_directory: /var/lib/agent/collections/java_app2
+  - process_name: redis_server
+    cpu_monitoring:
+      threshold: 85
+      stack_trace_collection: true
+      flame_graph_collection: false
+      collection_interval: 1m
+      output_directory: /var/lib/agent/collections/redis_server
+
+# 数据上报
+reporting:
+  central_server: "http://central-server.example.com/api/report"
+  port: 1234

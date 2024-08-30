@@ -2,6 +2,17 @@ package utils
 
 import "os"
 
+func FileExists(filename string) bool {
+	info, err := os.Stat(filename)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return false
+		}
+		return false
+	}
+	return !info.IsDir()
+}
+
 func DirExists(path string) bool {
 	fi, err := os.Stat(path)
 	if os.IsNotExist(err) {

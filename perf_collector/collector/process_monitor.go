@@ -4,10 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/baixiaozhou/backend/conf"
+	"github.com/baixiaozhou/backend/utils"
 	"github.com/shirou/gopsutil/v3/process"
 	"os/exec"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -51,29 +53,37 @@ func Monitor(monitors []conf.ProcessMonitor, worker_threads int) {
 	jsonData, _ := json.Marshal(monitors)
 	logger.Info(string(jsonData))
 
+	var wg sync.WaitGroup
+	semaphore := make(chan struct{}, worker_threads)
 	for _, monitor := range monitors {
 		logger.Info("Monitor process monitor:", monitor)
-		go monitorService(monitor, doneChannel)
+		wg.Add(1)
+		go monitorService(monitor, doneChannel, &wg, semaphore)
 	}
+	wg.Wait()
 	//for i := 0; i < worker_threads; i++ {
 	//	go monitorWorker(monitorChannel, doneChannel)
 	//}
 }
 
-func monitorWorker(monitors <-chan conf.ProcessMonitor, doneChannel chan bool) {
-	logger := conf.GetLogger()
-	logger.Info("Monitor worker start")
-	jsonData, _ := json.Marshal(monitors)
-	logger.Info(string(jsonData))
-	for monitor := range monitors {
-		logger.Info("Monitor process monitor:", monitor)
-		go monitorService(monitor, doneChannel)
-	}
-}
+//func monitorWorker(monitors <-chan conf.ProcessMonitor, doneChannel chan bool) {
+//	logger := conf.GetLogger()
+//	logger.Info("Monitor worker start")
+//	jsonData, _ := json.Marshal(monitors)
+//	logger.Info(string(jsonData))
+//	for monitor := range monitors {
+//		logger.Info("Monitor process monitor:", monitor)
+//		go monitorService(monitor, doneChannel)
+//	}
+//}
 
-func monitorService(processMonitor conf.ProcessMonitor, doneChannel chan bool) {
+func monitorService(processMonitor conf.ProcessMonitor, doneChannel chan bool, wg *sync.WaitGroup, semaphore chan struct{}) {
 	logger := conf.GetLogger()
-	logger.Info("Monitor service start")
+	logger.Debug("Monitor service start")
+
+	defer wg.Done()
+	semaphore <- struct{}{}
+	defer func() { <-semaphore }()
 
 	ticker := time.NewTicker(processMonitor.CpuMonitoring.Collection_Interval)
 	defer ticker.Stop()
@@ -94,7 +104,7 @@ func monitorService(processMonitor conf.ProcessMonitor, doneChannel chan bool) {
 			}
 			cpuPercent, err := p.Percent(time.Second)
 			if err != nil {
-				conf.Logger.Errorf("monitor get process err:%v", err)
+				conf.Logger.Errorf("monitor get process cpu percent err:%v", err)
 				return
 			}
 			if cpuPercent > float64(processMonitor.CpuMonitoring.Threshold) {
@@ -120,8 +130,31 @@ func monitorService(processMonitor conf.ProcessMonitor, doneChannel chan bool) {
 						conf.Logger.Debugf("get process stack info:%v, fileName:%v", string(jsonData), fileName)
 
 					}
-					if processMonitor.CpuMonitoring.Flame_Graph_Collection {
-
+					flame_graph := processMonitor.CpuMonitoring.Flame_Graph_Collection
+					if flame_graph.Enable {
+						// flame graph
+						if len(strings.TrimSpace(flame_graph.Exec_Cmd)) != 0 {
+							fileName := processMonitor.CpuMonitoring.Output_Dir + "/" + FLAME + "_" + strconv.Itoa(pid) + "_" + time.Now().Format(TIME_FORMAT) + HTML
+							cmdStr := strings.Replace(flame_graph.Exec_Cmd, "{{output_file}}", fileName, -1)
+							cmdStr = strings.Replace(cmdStr, "{{pid}}", fmt.Sprintf("%d", pid), -1)
+							// execute command
+							cmdArgs := strings.Split(cmdStr, " ")
+							cmd := exec.Command(cmdArgs[0], cmdArgs[1:]...)
+							err := cmd.Run()
+							if err != nil {
+								conf.Logger.Error("exec cmd err:%v, command:%v", err, cmdStr)
+							}
+						} else {
+							if len(strings.TrimSpace(flame_graph.Bin_Dir)) == 0 || !utils.DirExists(flame_graph.Bin_Dir) {
+								conf.Logger.Warn("can not get flame_graph because bin dir is not exist")
+							} else {
+								fileName, err := CatchJavaFlameGraph(pid, processMonitor.CpuMonitoring)
+								if err != nil {
+									conf.Logger.Errorf("catch java flame graph err:%v", err)
+								}
+								conf.Logger.Info("fileName:%v", fileName)
+							}
+						}
 					}
 				default:
 

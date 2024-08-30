@@ -42,6 +42,10 @@ const (
 const (
 	JSTACK      = "jstack"
 	TIME_FORMAT = "20060102150405"
+	ASPROF      = "asprof"
+	FLAME       = "flame"
+	HTML        = ".html"
+	EXIT_200    = "exit status 200"
 )
 
 type ThreadInfo struct {
@@ -235,4 +239,27 @@ func GenerJstackInfo(filePath string) (JstackInfo, error) {
 		}
 	}
 	return generInfo, nil
+}
+
+func CatchJavaFlameGraph(pid int, monitoring conf.CpuMonitoring) (fileName string, err error) {
+	flame := monitoring.Flame_Graph_Collection
+	asprof := flame.Bin_Dir + "/" + ASPROF
+	if err := utils.CreateDir(monitoring.Output_Dir); err != nil {
+		return "", err
+	}
+	file := monitoring.Output_Dir + "/" + FLAME + "_" + strconv.Itoa(pid) + "_" + time.Now().Format(TIME_FORMAT) + HTML
+	cmd := exec.Command(
+		asprof,
+		"-d", flame.Collection_Duration.String(),
+		"-e", "cpu",
+		"-f", file,
+		strconv.Itoa(pid))
+	err = cmd.Run()
+	if err != nil {
+		if strings.Contains(err.Error(), EXIT_200) {
+			exec.Command(asprof, "stop", strconv.Itoa(pid)).Run()
+		}
+		return "", err
+	}
+	return file, nil
 }

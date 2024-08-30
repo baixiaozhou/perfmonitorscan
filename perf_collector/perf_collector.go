@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	_ "fmt"
 	"github.com/alecthomas/kingpin"
 	"github.com/baixiaozhou/backend/collector"
 	"github.com/baixiaozhou/backend/conf"
@@ -11,24 +10,24 @@ import (
 	"time"
 )
 
-var config *conf.PerfCollectorConf
+// var config *conf.PerfCollectorConf
 
 func main() {
 	var (
 		config_path = kingpin.Flag(
-			"config_path",
+			"config-path",
 			"Path to the configuration file.",
 		).String()
 		//listen_port = kingpin.Flag(
-		//	"listen_port",
+		//	"listen-port",
 		//	"Port to listen on.",
 		//).Default("6660").Int()
 		refresh_interval = kingpin.Flag(
-			"refresh_interval",
+			"refresh-interval",
 			"Refresh interval in seconds.",
 		).Default("60").Int()
 		worker_threads = kingpin.Flag(
-			"worker_threads",
+			"worker-threads",
 			"Number of worker threads.",
 		).Default("5").Int()
 	)

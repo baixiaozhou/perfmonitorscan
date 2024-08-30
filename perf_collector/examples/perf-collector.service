@@ -1,0 +1,18 @@
+[Unit]
+Description=Perf Collector Service
+After=network.target
+
+[Service]
+ExecStart=/var/lib/perf_collector/start.sh
+Restart=always
+RestartSec=15
+User=root
+Group=root
+WorkingDirectory=/var/lib/perf_collector
+
+# Optional: Set limits
+LimitNOFILE=65536
+LimitNPROC=65536
+
+[Install]
+WantedBy=multi-user.target

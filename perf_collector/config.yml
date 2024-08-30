@@ -13,7 +13,11 @@ process_monitoring:
     cpu_monitoring:
       threshold: 80
       stack_trace_collection: true
-      flame_graph_collection: true
+      flame_graph_collection:
+        enable: true
+        bin_dir: /var/lib/async-profiler/bin
+        exec_cmd:
+        collection_duration: 30s
       collection_interval: 60s
       output_dir: /var/lib/agent/collections/java_app1
       bin_dir: # jstack dir

@@ -18,12 +18,19 @@ type Logging struct {
 }
 
 type CpuMonitoring struct {
-	Threshold              int           `yaml:"threshold"`
-	Stack_Trace_Collection bool          `yaml:"stack_trace_collection"`
-	Flame_Graph_Collection bool          `yaml:"flame_graph_collection"`
-	Collection_Interval    time.Duration `yaml:"collection_interval"`
-	Output_Dir             string        `yaml:"output_dir"`
-	Bin_Dir                string        `yaml:"bin_dir"`
+	Threshold              int                  `yaml:"threshold"`
+	Stack_Trace_Collection bool                 `yaml:"stack_trace_collection"`
+	Flame_Graph_Collection FlameGraphCollection `yaml:"flame_graph_collection"`
+	Collection_Interval    time.Duration        `yaml:"collection_interval"`
+	Output_Dir             string               `yaml:"output_dir"`
+	Bin_Dir                string               `yaml:"bin_dir"`
+}
+
+type FlameGraphCollection struct {
+	Enable              bool          `yaml:"enable"`
+	Bin_Dir             string        `yaml:"bin_dir"`
+	Exec_Cmd            string        `yaml:"exec_cmd"`
+	Collection_Duration time.Duration `yaml:"collection_duration"`
 }
 
 type ProcessMonitor struct {

@@ -1,12 +1,14 @@
 package main
 
 import (
+	"fmt"
 	"github.com/alecthomas/kingpin"
+	"github.com/baixiaozhou/perfmonitorscan/backend/api"
 	"github.com/baixiaozhou/perfmonitorscan/backend/conf"
-	"github.com/baixiaozhou/perfmonitorscan/backend/controller"
 	"github.com/baixiaozhou/perfmonitorscan/backend/storage"
 	"github.com/gin-gonic/gin"
 	"log"
+	"time"
 )
 
 func main() {
@@ -18,6 +20,10 @@ func main() {
 		"config-path",
 		"Path to the configuration file.",
 	).String()
+	refresh_interval := kingpin.Flag(
+		"refresh-interval",
+		"Refresh interval in seconds.",
+	).Default("60").Int()
 	kingpin.Parse()
 
 	err := conf.LoadConfig(*config_path)
@@ -27,9 +33,28 @@ func main() {
 
 	conf.InitLogger(&conf.GlobalConfig.Logging)
 
-	storage.InitDataBase(&conf.GlobalConfig.DB)
+	ticker := time.NewTicker(time.Duration(*refresh_interval) * time.Second)
+	defer ticker.Stop()
+	go func() {
+		for {
+			select {
+			case <-ticker.C:
+				err := conf.LoadConfig(*config_path)
+				if err != nil {
+					log.Fatal(err)
+				} else {
+					conf.ReloadLogConfig(&conf.GlobalConfig.Logging)
+				}
+			}
+		}
+	}()
+
+	if err := storage.InitDataBase(&conf.GlobalConfig.DB); err != nil {
+		fmt.Println("err:", err)
+		conf.Logger.Fatal(err)
+	}
 	// Create gin
 	r := gin.Default()
-	r.POST("/collect", controller.CollectData)
+	r.POST("/collect/cpu", api.CollectCpuData)
 	r.Run(*listenPort)
 }

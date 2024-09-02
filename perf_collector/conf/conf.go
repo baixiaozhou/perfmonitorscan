@@ -56,6 +56,19 @@ var (
 	Logger       = logrus.New()
 )
 
+type MonitoringCpuData struct {
+	HostIp             string
+	HostName           string
+	Time               string
+	Threshold          int
+	ProcCpuPercent     float64
+	ProcTopInfo        string
+	ProcType           string
+	StackInfo          string
+	StackFilePath      string
+	FlameGraphFilePath string
+}
+
 func LoadConfig(config_path string) error {
 	file, err := os.Open(config_path)
 	if err != nil {

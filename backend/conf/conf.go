@@ -68,3 +68,9 @@ func InitLogger(logging *Logging) {
 	})
 	Logger.SetLevel(logrus.Level(logging.Level))
 }
+
+func ReloadLogConfig(logging *Logging) {
+	mu.Lock()
+	defer mu.Unlock()
+	InitLogger(logging)
+}

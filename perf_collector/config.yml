@@ -39,5 +39,5 @@ process_monitoring:
 
 # 数据上报
 reporting:
-  central_server: "http://central-server.example.com/api/report"
+  central_server: "http://10.1.1.1:2345/"
   port: 1234

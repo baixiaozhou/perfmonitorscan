@@ -17,7 +17,7 @@ const (
 	SQLITE     = "SQLITE"
 )
 
-func InitDataBase(config *conf.DBConfig) {
+func InitDataBase(config *conf.DBConfig) error {
 	var err error
 	dbConfig := conf.GlobalConfig.DB
 	switch dbConfig.Database {
@@ -36,14 +36,17 @@ func InitDataBase(config *conf.DBConfig) {
 	}
 	if err != nil {
 		conf.Logger.Fatal("Init DB Error:" + err.Error())
+		return err
 	}
 
-	err = DB.AutoMigrate(&MonitoringData{})
+	err = DB.AutoMigrate(&MonitoringCpuData{})
 	if err != nil {
 		conf.Logger.Fatal("Init DB AutoMigrate Error:" + err.Error())
+		return err
 	}
+	return nil
 }
 
-func SaveData(data *MonitoringData) error {
+func SaveData(data *MonitoringCpuData) error {
 	return DB.Create(&data).Error
 }

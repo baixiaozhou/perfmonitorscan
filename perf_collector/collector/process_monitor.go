@@ -3,9 +3,11 @@ package collector
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/baixiaozhou/perfmonitorscan/perf_collector/api"
 	"github.com/baixiaozhou/perfmonitorscan/perf_collector/conf"
 	"github.com/baixiaozhou/perfmonitorscan/perf_collector/utils"
 	"github.com/shirou/gopsutil/v3/process"
+	"os"
 	"os/exec"
 	"strconv"
 	"strings"
@@ -39,6 +41,11 @@ type ProcessThreadInfo struct {
 	TIME     string
 	COMMAND  string
 }
+
+const (
+	API_CPU = "collect/cpu"
+	API_MEM = "collect/mem"
+)
 
 func Monitor(monitors []conf.ProcessMonitor, worker_threads int) {
 	// channel to pass services work
@@ -88,6 +95,8 @@ func monitorService(processMonitor conf.ProcessMonitor, doneChannel chan bool, w
 	ticker := time.NewTicker(processMonitor.CpuMonitoring.Collection_Interval)
 	defer ticker.Stop()
 
+	var monitorData conf.MonitoringCpuData
+
 	for {
 		select {
 		case <-ticker.C:
@@ -107,7 +116,13 @@ func monitorService(processMonitor conf.ProcessMonitor, doneChannel chan bool, w
 				conf.Logger.Errorf("monitor get process cpu percent err:%v", err)
 				return
 			}
+
+			hostName, _ := os.Hostname()
+			monitorData.HostName = hostName
 			if cpuPercent > float64(processMonitor.CpuMonitoring.Threshold) {
+				monitorData.Time = time.Now().Format(TIME_FORMAT)
+				monitorData.Threshold = processMonitor.CpuMonitoring.Threshold
+				monitorData.ProcCpuPercent = cpuPercent
 				conf.Logger.Debugf("the process :%v cpu usage is more than threshold, current:%v, threshold:%v",
 					processMonitor.ProcessName, cpuPercent, processMonitor.CpuMonitoring.Threshold)
 				processType := processMonitor.ProcessType
@@ -118,6 +133,7 @@ func monitorService(processMonitor conf.ProcessMonitor, doneChannel chan bool, w
 				}
 				jsonData, _ := json.Marshal(procThreadInfos)
 				conf.Logger.Debugf("get process thread info:%v", string(jsonData))
+				monitorData.ProcTopInfo = string(jsonData)
 				// collect process info
 				switch processType {
 				case JAVA:
@@ -128,7 +144,8 @@ func monitorService(processMonitor conf.ProcessMonitor, doneChannel chan bool, w
 						}
 						jsonData, _ := json.Marshal(stackInfo)
 						conf.Logger.Debugf("get process stack info:%v, fileName:%v", string(jsonData), fileName)
-
+						monitorData.StackInfo = string(jsonData)
+						monitorData.StackFilePath = fileName
 					}
 					flame_graph := processMonitor.CpuMonitoring.Flame_Graph_Collection
 					if flame_graph.Enable {
@@ -144,6 +161,7 @@ func monitorService(processMonitor conf.ProcessMonitor, doneChannel chan bool, w
 							if err != nil {
 								conf.Logger.Error("exec cmd err:%v, command:%v", err, cmdStr)
 							}
+							monitorData.FlameGraphFilePath = fileName
 						} else {
 							if len(strings.TrimSpace(flame_graph.Bin_Dir)) == 0 || !utils.DirExists(flame_graph.Bin_Dir) {
 								conf.Logger.Warn("can not get flame_graph because bin dir is not exist")
@@ -153,8 +171,12 @@ func monitorService(processMonitor conf.ProcessMonitor, doneChannel chan bool, w
 									conf.Logger.Errorf("catch java flame graph err:%v", err)
 								}
 								conf.Logger.Info("fileName:%v", fileName)
+								monitorData.FlameGraphFilePath = fileName
 							}
 						}
+					}
+					if err := api.SendData(conf.GlobalConfig.Report.Central_Server+API_CPU, monitorData); err != nil {
+						conf.Logger.Errorf("send data err:%v", err)
 					}
 				default:
 

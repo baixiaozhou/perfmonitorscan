@@ -52,8 +52,9 @@ func main() {
 				err := conf.LoadConfig(*config_path)
 				if err != nil {
 					log.Fatal(err)
+				} else {
+					conf.ReloadLogConfig(&conf.GlobalConfig.Log)
 				}
-				conf.ReloadLogConfig(&conf.GlobalConfig.Log)
 			}
 		}
 	}()

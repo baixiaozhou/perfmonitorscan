@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/alecthomas/kingpin"
-	"github.com/baixiaozhou/backend/collector"
-	"github.com/baixiaozhou/backend/conf"
+	"github.com/baixiaozhou/perfmonitorscan/perf_collector/collector"
+	"github.com/baixiaozhou/perfmonitorscan/perf_collector/conf"
 	"log"
 	"time"
 )

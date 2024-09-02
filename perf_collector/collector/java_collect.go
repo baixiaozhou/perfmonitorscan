@@ -3,8 +3,8 @@ package collector
 import (
 	"bufio"
 	"fmt"
-	"github.com/baixiaozhou/backend/conf"
-	"github.com/baixiaozhou/backend/utils"
+	"github.com/baixiaozhou/perfmonitorscan/perf_collector/conf"
+	"github.com/baixiaozhou/perfmonitorscan/perf_collector/utils"
 	"os"
 	"os/exec"
 	"regexp"

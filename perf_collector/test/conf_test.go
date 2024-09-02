@@ -1,8 +1,8 @@
 package test
 
 import (
-	"github.com/baixiaozhou/backend/collector"
-	"github.com/baixiaozhou/backend/conf"
+	"github.com/baixiaozhou/perfmonitorscan/perf_collector/collector"
+	"github.com/baixiaozhou/perfmonitorscan/perf_collector/conf"
 	"testing"
 )
 

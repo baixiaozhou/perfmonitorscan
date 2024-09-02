@@ -3,8 +3,8 @@ package collector
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/baixiaozhou/backend/conf"
-	"github.com/baixiaozhou/backend/utils"
+	"github.com/baixiaozhou/perfmonitorscan/perf_collector/conf"
+	"github.com/baixiaozhou/perfmonitorscan/perf_collector/utils"
 	"github.com/shirou/gopsutil/v3/process"
 	"os/exec"
 	"strconv"

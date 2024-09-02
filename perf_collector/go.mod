@@ -1,4 +1,4 @@
-module github.com/baixiaozhou/backend
+module github.com/baixiaozhou/perfmonitorscan/perf_collector
 
 go 1.22.3
 

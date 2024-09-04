@@ -53,6 +53,8 @@ func main() {
 		fmt.Println("err:", err)
 		conf.Logger.Fatal(err)
 	}
+
+	conf.Logger.Info("listening on port " + *listenPort)
 	// Create gin
 	r := gin.Default()
 	r.POST("/collect/cpu", api.CollectCpuData)

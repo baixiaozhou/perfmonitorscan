@@ -47,7 +47,7 @@ type Reporting struct {
 type PerfCollectorConf struct {
 	Log            Logging          `yaml:"logging"`
 	ProcessMonitor []ProcessMonitor `yaml:"process_monitoring"`
-	Report         Reporting        `yaml:"report"`
+	Report         Reporting        `yaml:"reporting"`
 }
 
 var (

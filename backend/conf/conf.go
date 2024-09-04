@@ -17,22 +17,22 @@ type Logging struct {
 }
 
 type DBConfig struct {
+	Database string `yaml:"database"`
 	Host     string `yaml:"host"`
-	Port     int    `yaml:"port"`
+	Port     string `yaml:"port"`
 	Username string `yaml:"username"`
 	Password string `yaml:"password"`
-	Database string `yaml:"database"`
 	DbName   string `yaml:"dbname"`
 }
 
 type BackendConfig struct {
 	Logging Logging  `yaml:"logging"`
-	DB      DBConfig `yaml:"db"`
+	DB      DBConfig `yaml:"database"`
 }
 
 var (
 	mu           sync.RWMutex
-	GlobalConfig *BackendConfig
+	GlobalConfig = BackendConfig{}
 	Logger       = logrus.New()
 )
 

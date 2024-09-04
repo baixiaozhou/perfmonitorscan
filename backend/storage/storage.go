@@ -12,9 +12,9 @@ import (
 var DB *gorm.DB
 
 const (
-	MYSQL      = "MYSQL"
-	POSTGRESQL = "POSTGRESQL"
-	SQLITE     = "SQLITE"
+	MYSQL      = "mysql"
+	POSTGRESQL = "postgresql"
+	SQLITE     = "sqlite"
 )
 
 func InitDataBase(config *conf.DBConfig) error {
@@ -32,7 +32,7 @@ func InitDataBase(config *conf.DBConfig) error {
 	case SQLITE:
 		DB, err = gorm.Open(sqlite.Open("monitoring.db"), &gorm.Config{})
 	default:
-		conf.Logger.Fatal("Unsupported database type")
+		conf.Logger.Fatal("Unsupported database type", dbConfig.Database)
 	}
 	if err != nil {
 		conf.Logger.Fatal("Init DB Error:" + err.Error())

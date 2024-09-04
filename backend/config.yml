@@ -1,15 +1,15 @@
 # 日志级别
 logging:
   level: 4
-  filename: ../agent.log
+  filename: /var/log/perfmonitorscan/backend/backend.log
   log_num: 20
   max_size: 1000000
   compress: true
 
 database:
-  database: "mysql"  # 支持的类型: sqlite, mysql, postgresql
-  user: "root"
-  password: "password"
+  database: "postgresql"  # 支持的类型: sqlite, mysql, postgresql
+  username: "postgres"
+  password: "test1234"
   host: "localhost"
-  port: "3306"
+  port: "5432"
   dbname: "monitoring"

@@ -3,18 +3,23 @@ package storage
 import (
 	"fmt"
 	"github.com/baixiaozhou/perfmonitorscan/backend/conf"
+	"github.com/elastic/go-elasticsearch/v8"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
-var DB *gorm.DB
+var (
+	DB       *gorm.DB
+	EsClient *elasticsearch.Client
+)
 
 const (
-	MYSQL      = "mysql"
-	POSTGRESQL = "postgresql"
-	SQLITE     = "sqlite"
+	MYSQL         = "mysql"
+	POSTGRESQL    = "postgresql"
+	SQLITE        = "sqlite"
+	ELASTICSEARCH = "es"
 )
 
 func InitDataBase(config *conf.DBConfig) error {
@@ -31,6 +36,15 @@ func InitDataBase(config *conf.DBConfig) error {
 		DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	case SQLITE:
 		DB, err = gorm.Open(sqlite.Open("monitoring.db"), &gorm.Config{})
+	case ELASTICSEARCH:
+		EsClient, err = InitEsClient(dbConfig)
+		if err != nil {
+			return err
+		}
+		if err := InitIndex(EsClient, "monitoring_cpu_data"); err != nil {
+			return err
+		}
+		return nil
 	default:
 		conf.Logger.Fatal("Unsupported database type", dbConfig.Database)
 	}

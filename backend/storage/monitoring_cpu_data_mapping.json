@@ -1,0 +1,73 @@
+{
+  "settings": {
+    "index": {
+      "number_of_shards": "dataNodeCount",
+      "number_of_replicas": "1"
+    }
+  },
+  "mappings": {
+    "properties": {
+      "HostIp": { "type": "ip" },
+      "HostName": { "type": "text" },
+      "Time": { "type": "date" },
+      "Threshold": { "type": "integer" },
+      "ProcCpuPercent": { "type": "float" },
+      "ProcTopInfo": {
+        "type": "nested",
+        "properties": {
+          "PID": { "type": "integer" },
+          "USER": { "type": "keyword" },
+          "PRIORITY": { "type": "integer" },
+          "NICE": { "type": "integer" },
+          "VIRT": { "type": "keyword" },
+          "RES": { "type": "keyword" },
+          "SHR": { "type": "keyword" },
+          "STATE": { "type": "keyword" },
+          "CPU_Per": { "type": "keyword" },
+          "MEM_Per": { "type": "keyword" },
+          "TIME": { "type": "keyword" },
+          "COMMAND": { "type": "keyword" }
+        }
+      },
+      "ProcType": { "type": "keyword" },
+      "StackInfo": {
+        "type": "object",
+        "properties": {
+          "ThreadsCount": { "type": "integer" },
+          "DeadLockCount": { "type": "integer" },
+          "RunnableCount": { "type": "integer" },
+          "WaitingParkCount": { "type": "integer" },
+          "WaitingMonitorCount": { "type": "integer" },
+          "BlockedCount": { "type": "integer" },
+          "TimedWaitCount": { "type": "integer" },
+          "OtherCount": { "type": "integer" },
+          "Threads": {
+            "type": "nested",
+            "properties": {
+              "Name": { "type": "keyword" },
+              "Id": { "type": "keyword" },
+              "Daemon": { "type": "boolean" },
+              "Priority": { "type": "integer" },
+              "Os_prio": { "type": "integer" },
+              "Cpu_time": { "type": "keyword" },
+              "Elapsed_time": { "type": "keyword" },
+              "Tid": { "type": "keyword" },
+              "Nid": { "type": "keyword" },
+              "State": { "type": "keyword" },
+              "Addr": { "type": "keyword" },
+              "StackTrace": { "type": "text" }
+            }
+          },
+          "Deadlocks": {
+            "type": "nested",
+            "properties": {
+              "Info": { "type": "text" }
+            }
+          }
+        }
+      },
+      "StackFilePath": { "type": "keyword" },
+      "FlameGraphFilePath": { "type": "keyword" }
+    }
+  }
+}

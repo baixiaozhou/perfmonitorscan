@@ -116,7 +116,8 @@ func monitorService(processMonitor conf.ProcessMonitor, doneChannel chan bool, w
 				conf.Logger.Errorf("monitor get process cpu percent err:%v", err)
 				return
 			}
-
+			// tmp, need change
+			monitorData.HostIp = "127.0.0.1"
 			hostName, _ := os.Hostname()
 			monitorData.HostName = hostName
 			if cpuPercent > float64(processMonitor.CpuMonitoring.Threshold) {

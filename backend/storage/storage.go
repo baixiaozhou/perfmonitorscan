@@ -22,6 +22,10 @@ const (
 	ELASTICSEARCH = "es"
 )
 
+const (
+	INDEX_NAME = "monitoring_cpu_data"
+)
+
 func InitDataBase(config *conf.DBConfig) error {
 	var err error
 	dbConfig := conf.GlobalConfig.DB
@@ -41,7 +45,7 @@ func InitDataBase(config *conf.DBConfig) error {
 		if err != nil {
 			return err
 		}
-		if err := InitIndex(EsClient, "monitoring_cpu_data"); err != nil {
+		if err := InitIndex(EsClient, INDEX_NAME); err != nil {
 			return err
 		}
 		return nil
@@ -62,5 +66,11 @@ func InitDataBase(config *conf.DBConfig) error {
 }
 
 func SaveData(data *MonitoringCpuData) error {
-	return DB.Create(&data).Error
+	dbCfg := conf.GlobalConfig.DB
+	fmt.Println(dbCfg.Database)
+	if dbCfg.Database == ELASTICSEARCH {
+		return SaveEsData(EsClient, data)
+	} else {
+		return DB.Create(&data).Error
+	}
 }

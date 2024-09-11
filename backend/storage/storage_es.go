@@ -128,3 +128,27 @@ func InitIndex(esClient *elasticsearch.Client, indexName string) error {
 	}
 	return nil
 }
+
+func SaveEsData(esClient *elasticsearch.Client, data interface{}) error {
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		conf.Logger.Error("Failed to marshal data:", err.Error())
+		return err
+	}
+	fmt.Println(string(jsonData))
+	req := esapi.IndexRequest{
+		Index:   INDEX_NAME,
+		Body:    bytes.NewReader(jsonData),
+		Refresh: "true",
+	}
+	res, err := req.Do(context.Background(), esClient)
+	if err != nil {
+		conf.Logger.Error("Failed to save data to es:", err.Error())
+		return err
+	}
+	if res.StatusCode != http.StatusCreated {
+		conf.Logger.Error("Failed to save data to es:", res.Status())
+		return err
+	}
+	return nil
+}

@@ -41,3 +41,6 @@ process_monitoring:
 reporting:
   central_server: "http://10.1.1.1:2345/"
   port: 1234
+
+# ip, 用于区分节点，不填写自动获取机器 ip
+ip: 10.0.0.1

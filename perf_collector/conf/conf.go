@@ -48,6 +48,7 @@ type PerfCollectorConf struct {
 	Log            Logging          `yaml:"logging"`
 	ProcessMonitor []ProcessMonitor `yaml:"process_monitoring"`
 	Report         Reporting        `yaml:"reporting"`
+	Ip             string           `yaml:"ip"`
 }
 
 var (

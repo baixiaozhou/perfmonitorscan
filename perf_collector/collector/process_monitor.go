@@ -96,6 +96,15 @@ func monitorService(processMonitor conf.ProcessMonitor, doneChannel chan bool, w
 	defer ticker.Stop()
 
 	var monitorData conf.MonitoringCpuData
+	if monitorData.HostIp != "" && utils.IsValidIP(monitorData.HostIp) {
+		monitorData.HostIp = conf.GlobalConfig.Ip
+	} else {
+		ip, err := utils.GetFirstValidIpv4()
+		if err != nil {
+			logger.Error("Get first valid ip err:", err)
+		}
+		monitorData.HostIp = ip
+	}
 
 	for {
 		select {
